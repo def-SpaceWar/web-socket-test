@@ -1,6 +1,7 @@
 import {
     JSONMessageHandler,
     reconnectExponential,
+    resetSocketListeners,
     setDisconnectHandlers,
     setMessageListeners,
     SimpleMessageHandler,
@@ -72,6 +73,7 @@ setDisconnectHandlers(
         reconnectExponential(() => {
             app.style.opacity = "100%";
             disconnectedDialog.style.opacity = "0";
+            resetSocketListeners();
             pingSocket();
         }),
 );

@@ -1,19 +1,27 @@
-Deno.serve((req) => {
-    if (req.headers.get("upgrade") != "websocket") {
-        return new Response(null, { status: 501 });
-    }
+import { serveDir } from "@std/http/file-server";
 
-    const { socket, response } = Deno.upgradeWebSocket(req);
+Deno.serve({
+    // can be async too!
+    handler(request) {
+        if (request.headers.get("upgrade") !== "websocket") {
+            return serveDir(request, {
+                fsRoot: "./",
+            });
+        }
 
-    socket.addEventListener("open", () => {
-        console.log("a client connected!");
-    });
+        const { socket, response } = Deno.upgradeWebSocket(request);
 
-    socket.addEventListener("message", (event) => {
-        if (event.data == "ping") return socket.send("ping");
-        console.log(JSON.parse(event.data));
-        socket.send(JSON.stringify({moreRandomData: Math.random()}));
-    });
+        socket.onopen = () => {
+            console.log("a client CONNECTED");
+        };
+        socket.onmessage = (event) => {
+            if (event.data == "ping") return socket.send("ping");
+            console.log(`RECEIVED: ${event.data}`);
+            socket.send(JSON.stringify({ moreRandomData: Math.random() }));
+        };
+        socket.onclose = () => console.log("a client DISCONNECTED");
+        socket.onerror = (error) => console.error("an ERROR:", error);
 
-    return response;
+        return response;
+    },
 });

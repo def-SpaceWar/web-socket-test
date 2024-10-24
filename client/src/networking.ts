@@ -7,7 +7,9 @@ export function reconnectExponential(onReopen: () => unknown, timeout = 1) {
         socket = new WebSocket("ws://localhost:8000");
         socket.onopen = onReopen;
         socket.onclose = onClose;
-        socketFirstOpen.catch(() => reconnectExponential(onReopen, timeout * 2));
+        socketFirstOpen.catch(() =>
+            reconnectExponential(onReopen, timeout * 2)
+        );
     }, timeout * 1_000);
 }
 
@@ -59,13 +61,16 @@ export function setMessageListeners(...handlers: MessageHandler[]) {
     for (let i = 0; i < handlers.length; i++) messageHandlers.push(handlers[i]);
 }
 
-socket.onmessage = (event) => {
-    for (let i = 0; i < messageHandlers.length; i++) {
-        if (messageHandlers[i].match(event.data)) {
-            return messageHandlers[i].handle();
+export function resetSocketListeners() {
+    socket.onmessage = (event) => {
+        for (let i = 0; i < messageHandlers.length; i++) {
+            if (messageHandlers[i].match(event.data)) {
+                return messageHandlers[i].handle();
+            }
         }
-    }
-};
+    };
+}
+resetSocketListeners();
 
 type DisconnectHandler = () => unknown;
 const closeHandlers: DisconnectHandler[] = [];
@@ -75,4 +80,4 @@ export function setDisconnectHandlers(...handlers: DisconnectHandler[]) {
 }
 function onClose() {
     for (let i = 0; i < closeHandlers.length; i++) closeHandlers[i]();
-};
+}
