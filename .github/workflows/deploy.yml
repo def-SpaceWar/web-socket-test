@@ -33,5 +33,5 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: "def-spacewa-web-socket-55"
-          entrypoint: "server/main.ts"
+          entrypoint: "../../server/main.ts"
           root: "./client/dist"
