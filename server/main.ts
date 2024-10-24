@@ -4,7 +4,7 @@ Deno.serve({
     // can be async too!
     handler(request) {
         if (request.headers.get("upgrade") != "websocket") {
-            if (new URL(request.url).pathname == "/main.ts") {
+            if (new URL(request.url).pathname.startsWith("/server")) {
                 return new Response("Not Found", { status: 404 });
             }
             return serveDir(request, {

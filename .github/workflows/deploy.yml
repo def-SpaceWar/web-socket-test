@@ -27,11 +27,11 @@ jobs:
         run: "cd client; deno i; cd ../server; deno i"
 
       - name: Build step
-        run: "cd client; deno run build; cp ../server/main.ts ./dist/server.ts"
+        run: "cd client; deno run build; cp -r ../server ./dist/"
 
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         with:
           project: "def-spacewa-web-socket-55"
-          entrypoint: "./server.ts"
+          entrypoint: "./server/main.ts"
           root: "./client/dist/"
