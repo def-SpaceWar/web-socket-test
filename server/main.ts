@@ -3,7 +3,10 @@ import { serveDir } from "@std/http/file-server";
 Deno.serve({
     // can be async too!
     handler(request) {
-        if (request.headers.get("upgrade") !== "websocket") {
+        if (request.headers.get("upgrade") != "websocket") {
+            if (new URL(request.url).pathname == "/main.ts") {
+                return new Response("Not Found", { status: 404 });
+            }
             return serveDir(request, {
                 fsRoot: "./",
             });
