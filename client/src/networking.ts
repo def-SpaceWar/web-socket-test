@@ -1,15 +1,18 @@
-export let socket = new WebSocket("ws://localhost:8000");
+export let socket = new WebSocket("ws://" + location.hostname + ":8000");
+console.log(location.hostname);
 socket.onclose = onClose;
 
-export function reconnectExponential(onReopen: () => unknown, timeout = 1) {
+export function reconnectLinear(onReopen: () => unknown, timeout = 1) {
     setTimeout(() => {
-        if (socket.readyState == socket.OPEN) return onReopen();
-        socket = new WebSocket("ws://localhost:8000");
+        if (socket.readyState == socket.OPEN) return;
+        socket = new WebSocket("ws://" + location.hostname + ":8000");
         socket.onopen = onReopen;
-        socket.onclose = onClose;
-        socketFirstOpen.catch(() =>
-            reconnectExponential(onReopen, timeout * 2)
-        );
+        socketFirstOpen
+            .then(() => {
+                socket.onclose = onClose;
+                onReopen();
+            })
+            .catch(() => reconnectLinear(onReopen, timeout + 1));
     }, timeout * 1_000);
 }
 
@@ -18,6 +21,7 @@ export const socketFirstOpen = new Promise<void>((res, rej) => {
         res();
     };
     socket.onerror = (e) => {
+        console.error(e);
         rej(e);
     };
 });

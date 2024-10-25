@@ -1,6 +1,6 @@
 import {
     JSONMessageHandler,
-    reconnectExponential,
+    reconnectLinear,
     resetSocketListeners,
     setDisconnectHandlers,
     setMessageListeners,
@@ -12,9 +12,8 @@ import "./style.css";
 
 const app = document.getElementById("app")! as HTMLDivElement;
 
-const pingText = app.appendChild(
-    document.createElement("p").appendChild(new Text("???ms")),
-);
+const pingText = document.createElement("p").appendChild(new Text("???ms"));
+app.appendChild(pingText.parentElement!);
 pingText.parentElement!.id = "ping";
 let before = 0, ping = 0;
 function pingSocket() {
@@ -28,6 +27,7 @@ const pingListener = new SimpleMessageHandler("ping", () => {
 });
 
 const button = app.appendChild(document.createElement("button"));
+app.appendChild(button);
 button.innerText = "Send Stuff";
 button.onclick = () =>
     socket.send(JSON.stringify({ randomData: Math.random() }));
@@ -37,12 +37,11 @@ const randomDataListener = new JSONMessageHandler(
     },
 );
 
-const disconnectedDialog = document.body.appendChild(
-    document.createElement("div"),
-);
+const disconnectedDialog = document.getElementById(
+    "disconnected-dialog",
+)! as HTMLDivElement;
 {
     disconnectedDialog.style.opacity = "0";
-    disconnectedDialog.id = "disconnected-dialog";
 
     const heading = disconnectedDialog.appendChild(
         document.createElement("h1"),
@@ -70,7 +69,7 @@ setMessageListeners(
 setDisconnectHandlers(
     myDisconnectHandler,
     () =>
-        reconnectExponential(() => {
+        reconnectLinear(() => {
             app.style.opacity = "100%";
             disconnectedDialog.style.opacity = "0";
             resetSocketListeners();
